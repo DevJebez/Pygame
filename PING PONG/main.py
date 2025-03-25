@@ -44,8 +44,9 @@ BALL = (255,255,0)
 PADDLE_VEL = 1
 
 #velocity of the ball 
-BALL_VEL_X= 10
-BALL_VEL_Y = 1
+BALL_VEL_X= 0.5
+BALL_VEL_Y = 0.5
+threshold = 5
 pygame.display.set_caption("PING PONG")
 
 
@@ -59,10 +60,32 @@ def draw_window(p1,p2,ball_position):
     #creating the ball
     pygame.draw.circle(WIN,BALL,ball_position,10)
 
-def ball_movement(keys_pressed,ball_position):
-    if keys_pressed[pygame.K_SPACE]:
-        ball_position.x += BALL_VEL_X
-    #ball_position.y += BALL_VEL_Y
+def ball_movement(ball_position):
+    global BALL_VEL_X
+    global BALL_VEL_Y
+    ball_position.x += BALL_VEL_X
+    ball_position.y += BALL_VEL_Y
+    if ball_position.y <= 0 or ball_position.y >= HEIGHT:
+        BALL_VEL_Y *= -1  # Reverse vertical direction
+
+
+    if ball_position.x <= 0 or ball_position.x >= WIDTH:
+        BALL_VEL_X *= -1 
+    
+    '''
+    #checking the upper bound
+    if ball_position.y <= 0:
+        BALL_VEL_Y *= -1
+    #checking the lower bound
+    if ball_position.y >= HEIGHT:
+        BALL_VEL_Y *= -1
+    #checking the left bound
+    if ball_position.x <= 0:
+        BALL_VEL_X *= -1
+    #checking the right bound
+    if ball_position.x >= WIDTH:
+        BALL_VEL_X *= -1
+    '''
 
 
 def player2_movement(keys_pressed,player):
@@ -88,6 +111,7 @@ def player1_movement(keys_pressed,player):
 def main():
     player1 = pygame.Rect(20,HEIGHT//2 - (PADDLE_HEIGHT//2),PADDLE_WIDTH,PADDLE_HEIGHT)
     player2 = pygame.Rect(WIDTH - PADDLE_WIDTH - 20,HEIGHT//2 - (PADDLE_HEIGHT//2),PADDLE_WIDTH,PADDLE_HEIGHT)
+    ball_position = pygame.Vector2(WIN.get_width() / 2, WIN.get_height() / 2)
     print(player1)
     print(player2)
     run = True
@@ -99,13 +123,11 @@ def main():
             if event.type == pygame.QUIT:
                 run = False 
                 pygame.quit() 
-
         keys_pressed = pygame.key.get_pressed() #stores the key that pressed runs 60 times per sec
         player1_movement(keys_pressed,player1)
         player2_movement(keys_pressed,player2)
+        ball_movement(ball_position)
 
-        ball_position = pygame.Vector2(WIN.get_width() / 2, WIN.get_height() / 2)
-        ball_movement(keys_pressed,ball_position)
         draw_window(player1,player2,ball_position)
 
         # to display the work on the screen
