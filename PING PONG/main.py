@@ -1,6 +1,8 @@
 import pygame,os 
+pygame.init()
 pygame.font.init()
 pygame.mixer.init()
+
 FPS = 60
 # setting height and width of the screen
 HEIGHT, WIDTH = 680,680
@@ -41,11 +43,11 @@ WHITE = (255,255,255)
 BALL = (255,255,0)
 
 #velocity of the paddle
-PADDLE_VEL = 1
+PADDLE_VEL = 10
 
 #velocity of the ball 
-BALL_VEL_X= 0.2
-BALL_VEL_Y = 0.2
+BALL_VEL_X= 5
+BALL_VEL_Y = 5
 
 pygame.display.set_caption("PING PONG")
 
@@ -91,11 +93,15 @@ def ball_movement(ball_position, player1, player2):
     if (ball_position.x - 10 <= player1.x + PADDLE_WIDTH and
         player1.y <= ball_position.y <= player1.y + PADDLE_HEIGHT):
         BALL_VEL_X *= -1
-
+        if abs(ball_position.y - player1.y) < 10 or abs(ball_position.y - (player1.y + PADDLE_HEIGHT)) < 10:
+            BALL_VEL_Y *= -1
+        
     # Collision with Right Paddle (Player 2)
     if (ball_position.x + 10 >= player2.x and
         player2.y <= ball_position.y <= player2.y + PADDLE_HEIGHT):
         BALL_VEL_X *= -1
+        if abs(ball_position.y - player2.y) < 10 or abs(ball_position.y - (player2.y + PADDLE_HEIGHT)) < 10:
+            BALL_VEL_Y *= -1
 
 
 def player2_movement(keys_pressed,player):
@@ -127,8 +133,9 @@ def main():
     score = {"player1": 0, "player2": 0}  # Store scores
 
     run = True
-    clock.tick(FPS)
+    
     while run:
+        clock.tick(FPS)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
@@ -148,7 +155,7 @@ def main():
 
         pygame.display.flip()
 
-    main()
+    pygame.quit()
 
 
 if __name__ == "__main__":
