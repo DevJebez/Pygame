@@ -1,76 +1,81 @@
-import pygame
+import pygame,os 
 pygame.init()
 pygame.font.init()
 pygame.mixer.init()
 
 FPS = 60
 # setting height and width of the screen
-HEIGHT, WIDTH = 680, 680
+HEIGHT, WIDTH = 680,680
 
-# setting the windows display
-WIN = pygame.display.set_mode((WIDTH, HEIGHT))
+#setting the windows display
+WIN = pygame.display.set_mode((HEIGHT,WIDTH))
 
-# paddle's height and width
-PADDLE_WIDTH, PADDLE_HEIGHT = 20, 100
+#paddle's height and width
+PADDLE_WIDTH, PADDLE_HEIGHT = 20,100
 
+#drawing border for collision 
+
+#BORDER = pygame.Rect(HEIGHT/2-5,0,10,WIDTH) 
 clock = pygame.time.Clock()
+'''
 
-# Colors
-GREEN = (0, 255, 0)
-RED = (255, 0, 0)
-color = (28, 1, 22)
-WHITE = (255, 255, 255)
-BALL = (255, 255, 0)
+Player's paddle dimension 
+width, height = 20,100    
 
-# velocity of the paddle
-PADDLE_VEL = 7
 
-# velocity of the ball 
-BALL_VEL_X = 5
+player1 coordinates = 300,50,100,20
+player2 coordinates  = 300,590,100,20'
+
+
+player 1 coordinates new 
+x axis = 20
+y axis = HEIGHT//2 - (PADDLE_HEIGHT//2)
+
+player 2 coordinates new 
+x axis = WIDTH - 10
+y axis = HEIGHT//2 - (PADDLE_HEIGHT//2)
+
+'''
+GREEN = (0,255,0)
+RED = (255,0,0)
+color=(28,1,22) 
+WHITE = (255,255,255)
+BALL = (255,255,0)
+
+#velocity of the paddle
+PADDLE_VEL = 10
+
+#velocity of the ball 
+BALL_VEL_X= 5
 BALL_VEL_Y = 5
 
 pygame.display.set_caption("PING PONG")
 
-# Font for score display
-SCORE_FONT = pygame.font.SysFont("comicsans", 40)
 
-def draw_window(p1, p2, ball_position, score):
+def draw_window(p1,p2,ball_position):
+
     WIN.fill(color)
-    
-    # Draw score
-    player1_score = SCORE_FONT.render(f"{score['player1']}", 1, WHITE)
-    player2_score = SCORE_FONT.render(f"{score['player2']}", 1, WHITE)
-    WIN.blit(player1_score, (WIDTH // 4 - player1_score.get_width() // 2, 20))
-    WIN.blit(player2_score, (WIDTH * 3 // 4 - player2_score.get_width() // 2, 20))
-    
-    # Draw center line
-    pygame.draw.line(WIN, WHITE, (WIDTH // 2, 0), (WIDTH // 2, HEIGHT), 2)
-    
     # left paddle
-    pygame.draw.rect(WIN, GREEN, p1)
+    pygame.draw.rect(WIN,GREEN,p1)
     # right paddle 
-    pygame.draw.rect(WIN, RED, p2)   
-    # creating the ball
-    pygame.draw.circle(WIN, BALL, (int(ball_position.x), int(ball_position.y)), 10)
+    pygame.draw.rect(WIN,RED,p2)   
+    #creating the ball
+    pygame.draw.circle(WIN,BALL,ball_position,10)
 
 def update_score(ball_position, score):
+
     """Updates the score if the ball moves past the paddles."""
     if ball_position.x < 0:  # Ball passed player 1 (left side)
         score["player2"] += 1
+        print(f"Player 2 Scores! Score: {score['player1']} - {score['player2']}")
         return True  # Indicate that the ball needs to be reset
 
     if ball_position.x > WIDTH:  # Ball passed player 2 (right side)
         score["player1"] += 1
+        print(f"Player 1 Scores! Score: {score['player1']} - {score['player2']}")
         return True  # Indicate that the ball needs to be reset
 
     return False  # No score update needed
-
-def reflect_ball_y(ball_position, paddle):
-    """Calculate Y velocity based on where the ball hit the paddle."""
-    center_of_paddle = paddle.y + PADDLE_HEIGHT / 2
-    distance_from_center = ball_position.y - center_of_paddle
-    normalization_factor = (PADDLE_HEIGHT / 2)
-    return (distance_from_center / normalization_factor) * 8  # Adjust 5 for bounciness
 
 
 def ball_movement(ball_position, player1, player2):
@@ -81,42 +86,43 @@ def ball_movement(ball_position, player1, player2):
     ball_position.y += BALL_VEL_Y
 
     # Collision with Top & Bottom Walls
-    if ball_position.y <= 10 or ball_position.y >= HEIGHT - 10:
+    if ball_position.y <= 0 or ball_position.y >= HEIGHT - 10:
         BALL_VEL_Y *= -1
 
-    
     # Collision with Left Paddle (Player 1)
-        # Collision with Left Paddle (Player 1)
-    if (ball_position.x - 10 <= player1.x + PADDLE_WIDTH and 
-        ball_position.x >= player1.x and
-        player1.y - 10 <= ball_position.y <= player1.y + PADDLE_HEIGHT + 10):
-        if BALL_VEL_X < 0:
-            BALL_VEL_X *= -1
-            BALL_VEL_Y = reflect_ball_y(ball_position, player1)
-
+    if (player1.x <= ball_position.x - 10 <= player1.x + PADDLE_WIDTH and 
+        player1.y <= ball_position.y <= player1.y + PADDLE_HEIGHT):
+        BALL_VEL_X *= -1
+        if abs(ball_position.y - player1.y) < 10 or abs(ball_position.y - (player1.y + PADDLE_HEIGHT)) < 10:
+            BALL_VEL_Y *= -1
+        
     # Collision with Right Paddle (Player 2)
-    if (ball_position.x + 10 >= player2.x and
-        ball_position.x <= player2.x + PADDLE_WIDTH and
-        player2.y - 10 <= ball_position.y <= player2.y + PADDLE_HEIGHT + 10):
-        if BALL_VEL_X > 0:
-            BALL_VEL_X *= -1
-            BALL_VEL_Y = reflect_ball_y(ball_position, player2)
+    if (player2.x <= ball_position.x + 10 <= player2.x + PADDLE_WIDTH and
+        player2.y <= ball_position.y <= player2.y + PADDLE_HEIGHT):
+
+        BALL_VEL_X *= -1
+        if abs(ball_position.y - player2.y) < 10 or abs(ball_position.y - (player2.y + PADDLE_HEIGHT)) < 10:
+            BALL_VEL_Y *= -1
 
 
-def player2_movement(keys_pressed, player):
+def player2_movement(keys_pressed,player):
+    # movement for upward
     # checking upper bound -- up
     if keys_pressed[pygame.K_KP8] and player.y - PADDLE_VEL > 0:
         player.y -= PADDLE_VEL 
-    # checking lower bound -- down
-    if keys_pressed[pygame.K_KP2] and player.y + PADDLE_VEL + PADDLE_HEIGHT <= HEIGHT:
+    #checking lower bound -- down
+    if keys_pressed[pygame.K_KP2] and player.y + PADDLE_VEL <= HEIGHT - PADDLE_HEIGHT:
+        print(f"player2_y:{player.y}")
         player.y += PADDLE_VEL
 
-def player1_movement(keys_pressed, player):
+
+def player1_movement(keys_pressed,player):
+    # movement for upward
     # checking upper bound -- up
     if keys_pressed[pygame.K_w] and player.y - PADDLE_VEL > 0:
         player.y -= PADDLE_VEL 
-    # checking lower bound -- down
-    if keys_pressed[pygame.K_s] and player.y + PADDLE_VEL + PADDLE_HEIGHT <= HEIGHT:
+    #checking lower bound -- down
+    if keys_pressed[pygame.K_s] and player.y + PADDLE_VEL  < HEIGHT-PADDLE_HEIGHT:
         player.y += PADDLE_VEL
 
 def main():
@@ -135,7 +141,6 @@ def main():
             if event.type == pygame.QUIT:
                 run = False
                 pygame.quit()
-                return
 
         keys_pressed = pygame.key.get_pressed()
         player1_movement(keys_pressed, player1)
@@ -145,13 +150,14 @@ def main():
 
         if update_score(ball_position, score):  # Check if a player scored
             ball_position.x, ball_position.y = WIDTH // 2, HEIGHT // 2  # Reset ball
-            BALL_VEL_X = abs(BALL_VEL_X) if ball_position.x < 0 else -abs(BALL_VEL_X)  # Serve toward the player who lost
-            BALL_VEL_Y = 5 * (1 if pygame.time.get_ticks() % 2 == 0 else -1)  # Random up/down direction
+            BALL_VEL_X *= -1  # Change direction
 
-        draw_window(player1, player2, ball_position, score)
+        draw_window(player1, player2, ball_position)
+
         pygame.display.flip()
 
     pygame.quit()
+
 
 if __name__ == "__main__":
     main()
