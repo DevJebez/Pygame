@@ -1,6 +1,7 @@
 import pygame
 pygame.init()
 from pygame import mixer
+import random
 FPS = 60
 # setting height and width of the screen
 HEIGHT, WIDTH = 680, 680
@@ -31,7 +32,7 @@ PADDLE_VEL = 10
 
 # velocity of the ball 
 BALL_VEL_X = 5
-BALL_VEL_Y = 5
+BALL_VEL_Y = 10
 
 pygame.display.set_caption("PING PONG")
 
@@ -87,7 +88,9 @@ def ball_movement(ball_position, player1, player2):
         hit_sound.play()
         if BALL_VEL_X < 0:  # Only bounce if moving toward the paddle
             BALL_VEL_X *= -1
-        
+            print(BALL_VEL_X)
+            ball_relative_y = (ball_position.y - player1.y) / PADDLE_HEIGHT
+            BALL_VEL_Y = 10 * (ball_relative_y - 0.5)
         
     # Collision with Right Paddle (Player 2)
     if (ball_position.x + 10 >= player2.x and
@@ -96,7 +99,9 @@ def ball_movement(ball_position, player1, player2):
         hit_sound.play()
         if BALL_VEL_X > 0:  # Only bounce if moving toward the paddle
             BALL_VEL_X *= -1
-            
+            print(BALL_VEL_X)
+            ball_relative_y = (ball_position.y - player2.y) / PADDLE_HEIGHT
+            BALL_VEL_Y = 10 * (ball_relative_y - 0.5)
 def player2_movement(keys_pressed, player):
     # checking upper bound -- up
     if keys_pressed[pygame.K_KP_8] and player.y - PADDLE_VEL > 0:
@@ -140,7 +145,7 @@ def main():
         if update_score(ball_position, score):  # Check if a player scored
             ball_position.x, ball_position.y = WIDTH // 2, HEIGHT // 2  # Reset ball
             BALL_VEL_X = abs(BALL_VEL_X) if ball_position.x < 0 else -abs(BALL_VEL_X)  # Serve toward the player who lost
-            BALL_VEL_Y = 5 * (1 if pygame.time.get_ticks() % 2 == 0 else -1)  # Random up/down direction
+            BALL_VEL_Y = BALL_VEL_Y = random.randint(5, 10) * (1 if pygame.time.get_ticks() % 2 == 0 else -1)  # Random up/down direction
 
         draw_window(player1, player2, ball_position, score)
         pygame.display.flip()
